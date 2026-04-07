@@ -132,6 +132,7 @@
     <script src="playlist.js"></script>
     <script>
         let players = [];
+        let unusedSongs = [];
         let totalRounds = 5, currentRound = 1, currentPlayerIdx = 0;
         let rehearCount = 0, audio = new Audio(), currentSong = null;
 
@@ -151,13 +152,26 @@
                 let nameVal = document.getElementById(`name-${i}`).value;
                 players.push({ name: nameVal || `PLAYER ${i}`, score: 0, passesUsed: 0 });
             }
+            
+            // Fill the unused list from playlist.js
+            unusedSongs = [...mySongs];
+            
             document.getElementById('name-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             setupTurn();
         }
 
         function setupTurn() {
-            currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
+            // Check if we ran out of songs
+            if (unusedSongs.length === 0) {
+                alert("💖 ALL SONGS PLAYED! RESTARTING LIBRARY...");
+                unusedSongs = [...mySongs]; // Refill
+            }
+
+            // Pick random from unused list
+            const randomIndex = Math.floor(Math.random() * unusedSongs.length);
+            currentSong = unusedSongs[randomIndex];
+            
             rehearCount = 0;
             const p = players[currentPlayerIdx];
             document.getElementById('display-round').innerText = `ROUND ${currentRound}/${totalRounds}`;
@@ -198,12 +212,13 @@
 
         function usePass() {
             const p = players[currentPlayerIdx];
-            // Penalty only applies if it's NOT the first pass
             if (p.passesUsed > 0) {
                 p.score -= 3;
             }
             p.passesUsed++;
-            setupTurn(); // Refresh turn with new song and reset point potential to 5
+            // Note: We DON'T remove the skipped song from unusedSongs 
+            // so it can appear again later for someone else!
+            setupTurn(); 
         }
 
         function revealAnswer() {
@@ -211,6 +226,9 @@
             document.getElementById('song-title').innerText = currentSong.title.toUpperCase();
             document.getElementById('song-artist').innerText = currentSong.artist.toUpperCase();
             document.getElementById('answer-area').classList.remove('hidden');
+            
+            // REMOVE SONG FROM UNUSED LIST (It was revealed, so it's done)
+            unusedSongs = unusedSongs.filter(s => s.url !== currentSong.url);
         }
 
         function handleScore(isCorrect) {
