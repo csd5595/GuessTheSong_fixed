@@ -43,3 +43,74 @@
             </div>
         </div>
     </div>
+
+    <script src="playlist.js"></script>
+
+    <script>
+        let players = [];
+        let currentPlayer = 0;
+        let audio = new Audio();
+        let currentSong = null;
+
+        function startGame() {
+            const count = document.getElementById('playerInput').value;
+            players = []; // Clear old players
+            for(let i=1; i<=count; i++) players.push(`Player ${i}`);
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            updateTurnText();
+        }
+
+        function updateTurnText() {
+            document.getElementById('player-turn').innerText = `${players[currentPlayer]}'s Turn`;
+        }
+
+        function startTurn() {
+            // Check if playlist loaded
+            if (typeof mySongs === 'undefined' || mySongs.length === 0) {
+                alert("Playlist not found! Check your playlist.js file.");
+                return;
+            }
+
+            currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
+            audio.src = currentSong.url;
+            audio.load(); 
+            
+            document.getElementById('play-btn').disabled = true;
+            
+            audio.play().then(() => {
+                let timeLeft = 5;
+                document.getElementById('timer').innerText = timeLeft;
+                
+                const interval = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('timer').innerText = timeLeft;
+                    if(timeLeft <= 0) {
+                        clearInterval(interval);
+                        audio.pause();
+                        showAnswer();
+                    }
+                }, 1000);
+            }).catch(error => {
+                alert("Audio blocked! Make sure your phone is NOT on silent and volume is UP.");
+                document.getElementById('play-btn').disabled = false;
+            });
+        }
+
+        function showAnswer() {
+            document.getElementById('song-title').innerText = currentSong.title;
+            document.getElementById('song-artist').innerText = currentSong.artist;
+            document.getElementById('answer-area').classList.remove('hidden');
+        }
+
+        function nextPlayer() {
+            currentPlayer = (currentPlayer + 1) % players.length;
+            document.getElementById('answer-area').classList.add('hidden');
+            document.getElementById('play-btn').disabled = false;
+            document.getElementById('timer').innerText = "5";
+            updateTurnText();
+        }
+    </script>
+</body>
+</html>
