@@ -58,7 +58,6 @@
         button:hover { background: var(--hot-pink); transform: translateY(-2px); }
         .secondary-btn { background: transparent; border: 2px solid var(--baby-pink); color: var(--baby-pink); }
         
-        /* Tactical Pass Button Style */
         .pass-btn { background: #333; color: var(--baby-pink); border: 1px dashed var(--baby-pink); font-size: 11px; margin-top: 15px; }
         .pass-btn:hover { background: #444; border-style: solid; }
 
@@ -160,8 +159,9 @@
         function setupTurn() {
             currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
             rehearCount = 0;
+            const p = players[currentPlayerIdx];
             document.getElementById('display-round').innerText = `ROUND ${currentRound}/${totalRounds}`;
-            document.getElementById('display-player-name').innerText = players[currentPlayerIdx].name.toUpperCase();
+            document.getElementById('display-player-name').innerText = p.name.toUpperCase();
             document.getElementById('rehear-display').innerText = `WORTH 5 POINTS`;
             document.getElementById('timer').innerText = "5";
             document.getElementById('play-btn').classList.remove('hidden');
@@ -189,24 +189,21 @@
                         let pts = rehearCount === 1 ? 3 : (rehearCount === 2 ? 2 : 1);
                         document.getElementById('rehear-display').innerText = `NEXT PLAY WORTH: ${pts} PTS`;
                         
-                        // Update Pass Button Text based on player history
                         const p = players[currentPlayerIdx];
                         document.getElementById('pass-btn-el').innerText = p.passesUsed === 0 ? "FREE SKIP (NEW SONG)" : "SKIP (-3 PTS PENALTY)";
                     }
                 }, 1000);
-            }).catch(e => alert("AUDIO BLOCKED! CHECK VOLUME."));
+            }).catch(e => console.log("Audio play blocked"));
         }
 
         function usePass() {
             const p = players[currentPlayerIdx];
+            // Penalty only applies if it's NOT the first pass
             if (p.passesUsed > 0) {
                 p.score -= 3;
-                alert("Pass used! -3 points deducted.");
-            } else {
-                alert("Used your 1 Free Pass! Points reset for the new song.");
             }
             p.passesUsed++;
-            setupTurn(); // Reset turn with new song and 5pt potential
+            setupTurn(); // Refresh turn with new song and reset point potential to 5
         }
 
         function revealAnswer() {
@@ -243,7 +240,6 @@
             let sorted = [...players].sort((a,b) => b.score - a.score);
             document.getElementById('winner-name').innerText = sorted[0].name.toUpperCase();
             
-            // CONFETTI!
             var end = Date.now() + 5000;
             var colors = ['#ffb7c5', '#ff85a1', '#ffffff'];
             (function frame() {
