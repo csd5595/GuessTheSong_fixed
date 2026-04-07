@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Guessr Pro</title>
+    <title>Song Guessr Pro - Tournament</title>
     <style>
         :root { --spotify-green: #1DB954; --bg-dark: #121212; --card-bg: #181818; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-dark); color: white; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 450px; background: var(--card-bg); padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid #282828; }
-        h1 { color: var(--spotify-green); font-size: 2rem; margin-bottom: 10px; letter-spacing: -1px; }
-        .timer { font-size: 80px; font-weight: 800; margin: 20px 0; color: var(--spotify-green); text-shadow: 0 0 20px rgba(29, 185, 84, 0.3); }
-        h3 { color: #b3b3b3; font-weight: 400; margin-bottom: 30px; }
+        .container { width: 95%; max-width: 500px; background: var(--card-bg); padding: 30px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid #282828; text-align: center; }
+        h1 { color: var(--spotify-green); margin-bottom: 5px; }
+        .timer { font-size: 70px; font-weight: 800; margin: 15px 0; color: var(--spotify-green); }
+        h3 { color: #b3b3b3; font-weight: 400; margin: 10px 0; }
         
-        button { background: var(--spotify-green); color: black; border: none; padding: 16px 32px; font-size: 16px; font-weight: 700; border-radius: 50px; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; margin: 8px 0; text-transform: uppercase; letter-spacing: 1px; }
-        button:hover { transform: scale(1.03); background: #1ed760; }
-        button:active { transform: scale(0.98); }
-        button:disabled { background: #333; color: #777; cursor: not-allowed; transform: none; }
+        button { background: var(--spotify-green); color: black; border: none; padding: 16px; font-size: 14px; font-weight: 700; border-radius: 50px; cursor: pointer; transition: 0.2s; width: 100%; margin: 8px 0; text-transform: uppercase; }
+        button:hover { transform: scale(1.02); background: #1ed760; }
         .secondary-btn { background: transparent; border: 2px solid #555; color: white; }
-        .secondary-btn:hover { border-color: white; background: transparent; }
+        .correct-btn { background: #2d5ff5; color: white; } /* Blue for Correct */
+        .wrong-btn { background: #e91e63; color: white; } /* Red for Wrong */
 
-        input { background: #282828; border: 1px solid #404040; color: white; padding: 12px; border-radius: 8px; width: 60px; font-size: 18px; text-align: center; margin-bottom: 20px; outline: none; }
-        input:focus { border-color: var(--spotify-green); }
+        .input-group { margin: 15px 0; display: flex; justify-content: space-between; align-items: center; background: #282828; padding: 10px 20px; border-radius: 12px; }
+        input { background: transparent; border: none; color: var(--spotify-green); font-size: 20px; width: 50px; text-align: center; outline: none; font-weight: bold; }
 
         .hidden { display: none; }
-        .answer-box { background: #282828; padding: 25px; border-radius: 16px; margin-top: 20px; border-left: 5px solid var(--spotify-green); animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        #song-title { font-size: 24px; margin: 0; }
-        #song-artist { color: #b3b3b3; margin-top: 5px; font-size: 16px; }
-        .control-group { margin-top: 20px; }
+        .answer-box { background: #282828; padding: 20px; border-radius: 16px; margin-top: 20px; border-left: 5px solid var(--spotify-green); }
+        
+        /* Scoreboard Style */
+        .scoreboard { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; text-align: left; }
+        .score-row { display: flex; justify-content: space-between; margin: 5px 0; color: #b3b3b3; font-size: 14px; }
+        .winner-screen h2 { color: var(--spotify-green); font-size: 32px; }
     </style>
 </head>
 <body>
@@ -36,15 +36,25 @@
         <h1>🎵 Song Guessr</h1>
         
         <div id="setup-screen">
-            <p style="color: #b3b3b3;">Ready to test your ears?</p>
-            <label style="display:block; margin-bottom: 10px;">Number of Players:</label>
-            <input type="number" id="playerInput" value="2" min="1">
-            <button onclick="startGame()">Start Competition</button>
+            <div class="input-group">
+                <span>Number of Players</span>
+                <input type="number" id="playerInput" value="2" min="1">
+            </div>
+            <div class="input-group">
+                <span>Rounds to Play</span>
+                <input type="number" id="roundInput" value="5" min="1">
+            </div>
+            <button onclick="startGame()">Start Tournament</button>
         </div>
 
         <div id="game-screen" class="hidden">
-            <h3 id="player-turn">Player 1's Turn</h3>
+            <div id="game-info" style="display:flex; justify-content: space-between; color: #b3b3b3; font-size: 12px;">
+                <span id="display-round">Round: 1/5</span>
+                <span id="display-player-name">Player 1</span>
+            </div>
+            
             <div id="timer" class="timer">5</div>
+            <h3 id="rehear-count-display">Heard: 0 times</h3>
             
             <button id="play-btn" onclick="startTurn()">Play 5 Seconds</button>
             
@@ -55,12 +65,25 @@
             
             <div id="answer-area" class="hidden">
                 <div class="answer-box">
-                    <p style="color: var(--spotify-green); font-size: 12px; font-weight: bold; margin: 0 0 10px 0;">REVEALED</p>
                     <h2 id="song-title">Song Name</h2>
                     <p id="song-artist">Artist Name</p>
                 </div>
-                <button onclick="nextPlayer()" style="margin-top: 20px;">Next Player →</button>
+                <p style="margin-top:15px; font-weight:bold;">Did they guess it?</p>
+                <div style="display:flex; gap: 10px;">
+                    <button class="wrong-btn" onclick="handleScore(false)">❌ NO</button>
+                    <button class="correct-btn" onclick="handleScore(true)">✅ YES</button>
+                </div>
             </div>
+
+            <div class="scoreboard" id="scoreboard">
+                </div>
+        </div>
+
+        <div id="winner-screen" class="hidden" class="winner-screen">
+            <p>Tournament Complete!</p>
+            <h2 id="winner-name">Player 1 Wins!</h2>
+            <div id="final-scores"></div>
+            <button onclick="location.reload()" style="margin-top:20px;">Play Again</button>
         </div>
     </div>
 
@@ -68,34 +91,46 @@
 
     <script>
         let players = [];
-        let currentPlayer = 0;
+        let totalRounds = 5;
+        let currentRound = 1;
+        let currentPlayerIdx = 0;
+        let rehearCount = 0;
         let audio = new Audio();
         let currentSong = null;
 
         function startGame() {
-            const count = document.getElementById('playerInput').value;
+            const pCount = document.getElementById('playerInput').value;
+            totalRounds = document.getElementById('roundInput').value;
+            
             players = [];
-            for(let i=1; i<=count; i++) players.push(`Player ${i}`);
+            for(let i=0; i<pCount; i++) {
+                players.push({ name: `Player ${i+1}`, score: 0 });
+            }
+
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
-            // Select first song immediately but don't play yet
-            currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
-            updateTurnText();
+            setupTurn();
         }
 
-        function updateTurnText() {
-            document.getElementById('player-turn').innerText = `${players[currentPlayer]}'s Turn`;
+        function setupTurn() {
+            currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
+            rehearCount = 0;
+            document.getElementById('display-round').innerText = `Round: ${currentRound}/${totalRounds}`;
+            document.getElementById('display-player-name').innerText = players[currentPlayerIdx].name;
+            document.getElementById('rehear-count-display').innerText = `Heard: 0 times`;
+            document.getElementById('timer').innerText = "5";
+            document.getElementById('play-btn').classList.remove('hidden');
+            document.getElementById('post-play-controls').classList.add('hidden');
+            document.getElementById('answer-area').classList.add('hidden');
+            updateScoreboard();
         }
 
         function startTurn() {
-            if (typeof mySongs === 'undefined') return alert("Playlist error!");
-
             audio.src = currentSong.url;
             audio.load();
             
             document.getElementById('play-btn').classList.add('hidden');
             document.getElementById('post-play-controls').classList.add('hidden');
-            document.getElementById('timer').innerText = "5";
 
             audio.play().then(() => {
                 let timeLeft = 5;
@@ -106,9 +141,11 @@
                         clearInterval(interval);
                         audio.pause();
                         document.getElementById('post-play-controls').classList.remove('hidden');
+                        if (audio.currentTime > 0) rehearCount++; 
+                        document.getElementById('rehear-count-display').innerText = `Heard: ${rehearCount} times`;
                     }
                 }, 1000);
-            }).catch(e => alert("Please check your volume/mute switch!"));
+            }).catch(e => alert("Error playing audio. Check Mute/Volume!"));
         }
 
         function revealAnswer() {
@@ -118,14 +155,57 @@
             document.getElementById('answer-area').classList.remove('hidden');
         }
 
-        function nextPlayer() {
-            currentPlayer = (currentPlayer + 1) % players.length;
-            currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
+        function handleScore(isCorrect) {
+            if (isCorrect) {
+                // Scoring Logic:
+                // rehearCount is 1 if they heard it once (0 rehears)
+                // rehearCount is 2 if they heard it twice (1 rehear)
+                let actualRehears = rehearCount - 1; 
+                
+                if (actualRehears === 0) players[currentPlayerIdx].score += 5;
+                else if (actualRehears === 1) players[currentPlayerIdx].score += 3;
+                else if (actualRehears === 2) players[currentPlayerIdx].score += 2;
+                else players[currentPlayerIdx].score += 1;
+            }
+
+            // Move to next player
+            currentPlayerIdx++;
             
-            document.getElementById('answer-area').classList.add('hidden');
-            document.getElementById('play-btn').classList.remove('hidden');
-            document.getElementById('timer').innerText = "5";
-            updateTurnText();
+            // Check if round is over
+            if (currentPlayerIdx >= players.length) {
+                currentPlayerIdx = 0;
+                currentRound++;
+            }
+
+            // Check if game is over
+            if (currentRound > totalRounds) {
+                showWinner();
+            } else {
+                setupTurn();
+            }
+        }
+
+        function updateScoreboard() {
+            let html = '<strong>Live Scoreboard</strong>';
+            players.forEach(p => {
+                html += `<div class="score-row"><span>${p.name}</span><span>${p.score} pts</span></div>`;
+            });
+            document.getElementById('scoreboard').innerHTML = html;
+        }
+
+        function showWinner() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('winner-screen').classList.remove('hidden');
+            
+            // Find highest score
+            let winner = players.reduce((prev, current) => (prev.score > current.score) ? prev : current);
+            document.getElementById('winner-name').innerText = `${winner.name} Wins with ${winner.score}pts!`;
+            
+            let finalHtml = '';
+            players.sort((a,b) => b.score - a.score).forEach(p => {
+                finalHtml += `<p>${p.name}: ${p.score} points</p>`;
+            });
+            document.getElementById('final-scores').innerHTML = finalHtml;
         }
     </script>
 </body>
