@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Guessr - Pink & Black Edition</title>
+    <title>Song Guessr - Pink Tournament</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
             --baby-pink: #ffb7c5; 
@@ -21,6 +22,7 @@
             align-items: center; 
             justify-content: center; 
             min-height: 100vh; 
+            overflow-x: hidden;
         }
 
         .container { 
@@ -32,6 +34,8 @@
             border: 2px solid var(--baby-pink);
             box-shadow: 0 0 20px rgba(255, 183, 197, 0.2); 
             text-align: center; 
+            position: relative;
+            z-index: 10;
         }
 
         h1 { color: var(--baby-pink); font-size: 2.2rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
@@ -54,6 +58,7 @@
 
         button:hover { background: var(--hot-pink); transform: translateY(-2px); }
         .secondary-btn { background: transparent; border: 2px solid var(--baby-pink); color: var(--baby-pink); }
+        .pass-btn { background: #555; color: white; font-size: 12px; padding: 10px; margin-top: 15px; }
         .correct-btn { background: #00ff88; color: black; } 
         .wrong-btn { background: #ff4444; color: white; } 
 
@@ -80,11 +85,10 @@
             border-radius: 20px; 
             border: 1px solid var(--baby-pink); 
             margin-top: 20px; 
-            box-shadow: inset 0 0 10px rgba(255, 183, 197, 0.1);
         }
 
         .scoreboard { margin-top: 25px; text-align: left; border-top: 1px solid #333; padding-top: 15px; }
-        .score-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; }
+        .score-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 12px; }
         
         #winner-name { font-size: 40px; color: var(--hot-pink); text-shadow: 0 0 20px var(--hot-pink); }
     </style>
@@ -92,18 +96,18 @@
 <body>
 
     <div class="container">
-        <h1>🎀 SONG GUESSR</h1>
+        <h1>🎀 GUESS THE SONG</h1>
         
         <div id="setup-screen">
             <div class="input-card">
-                <p>HOW MANY PLAYERS?</p>
+                <p>PLAYERS</p>
                 <input type="number" id="playerCount" value="2" min="1">
             </div>
             <div class="input-card">
-                <p>HOW MANY ROUNDS?</p>
+                <p>ROUNDS</p>
                 <input type="number" id="roundCount" value="5" min="1">
             </div>
-            <button onclick="showNameScreen()">NEXT: ENTER NAMES ✨</button>
+            <button onclick="showNameScreen()">ENTER NAMES</button>
         </div>
 
         <div id="name-screen" class="hidden">
@@ -127,6 +131,8 @@
                 <button class="secondary-btn" onclick="startTurn()">REHEAR SONG ↺</button>
                 <button onclick="revealAnswer()">REVEAL ANSWER 🔍</button>
             </div>
+
+            <button id="pass-btn-el" class="pass-btn" onclick="usePass()">SKIP SONG (PASSES USED: 0)</button>
             
             <div id="answer-area" class="hidden">
                 <div class="answer-box">
@@ -179,7 +185,11 @@
             players = [];
             for(let i=1; i<=count; i++) {
                 let nameVal = document.getElementById(`name-${i}`).value;
-                players.push({ name: nameVal || `PLAYER ${i}`, score: 0 });
+                players.push({ 
+                    name: nameVal || `PLAYER ${i}`, 
+                    score: 0,
+                    passesUsed: 0 
+                });
             }
             document.getElementById('name-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
@@ -189,14 +199,33 @@
         function setupTurn() {
             currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
             rehearCount = 0;
+            const p = players[currentPlayerIdx];
+            
             document.getElementById('display-round').innerText = `ROUND ${currentRound}/${totalRounds}`;
-            document.getElementById('display-player-name').innerText = players[currentPlayerIdx].name.toUpperCase();
+            document.getElementById('display-player-name').innerText = p.name.toUpperCase();
             document.getElementById('rehear-display').innerText = `WORTH 5 POINTS`;
             document.getElementById('timer').innerText = "5";
             document.getElementById('play-btn').classList.remove('hidden');
             document.getElementById('post-play-controls').classList.add('hidden');
             document.getElementById('answer-area').classList.add('hidden');
+            document.getElementById('pass-btn-el').classList.remove('hidden');
+            document.getElementById('pass-btn-el').innerText = `SKIP SONG (PASSES USED: ${p.passesUsed})`;
             updateScoreboard();
+        }
+
+        function usePass() {
+            const p = players[currentPlayerIdx];
+            
+            // Logic: Any pass after the 0th pass costs 3 points
+            if (p.passesUsed > 0) {
+                p.score -= 3;
+                alert("Pass used! -3 Points penalty applied.");
+            } else {
+                alert("First pass is free! Good luck with the new song.");
+            }
+            
+            p.passesUsed++;
+            setupTurn(); // Pick a new song and reset turn state
         }
 
         function startTurn() {
@@ -204,6 +233,7 @@
             audio.load();
             document.getElementById('play-btn').classList.add('hidden');
             document.getElementById('post-play-controls').classList.add('hidden');
+            document.getElementById('pass-btn-el').classList.add('hidden'); // Cannot pass while/after listening
 
             audio.play().then(() => {
                 let timeLeft = 5;
@@ -216,7 +246,6 @@
                         rehearCount++;
                         document.getElementById('post-play-controls').classList.remove('hidden');
                         
-                        // Scoring hints
                         let points = rehearCount === 1 ? 3 : (rehearCount === 2 ? 2 : 1);
                         document.getElementById('rehear-display').innerText = `NEXT PLAY WORTH: ${points} PTS`;
                     }
@@ -260,6 +289,22 @@
             document.getElementById('winner-screen').classList.remove('hidden');
             let sorted = [...players].sort((a,b) => b.score - a.score);
             document.getElementById('winner-name').innerText = sorted[0].name.toUpperCase();
+            
+            // CELEBRATION!
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }, colors: ['#ffb7c5', '#ff85a1'] }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }, colors: ['#ffb7c5', '#ff85a1'] }));
+            }, 250);
+
             let finalHtml = '';
             sorted.forEach(p => finalHtml += `<p>${p.name.toUpperCase()}: ${p.score} PTS</p>`);
             document.getElementById('final-list').innerHTML = finalHtml;
