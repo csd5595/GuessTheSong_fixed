@@ -11,6 +11,8 @@
             --hot-pink: #ff85a1;
             --dark-bg: #000000;
             --card-bg: #111111;
+            --mint: #b2f2bb;
+            --coral: #ff8787;
         }
         
         body { 
@@ -58,11 +60,11 @@
         button:hover { background: var(--hot-pink); transform: translateY(-2px); }
         .secondary-btn { background: transparent; border: 2px solid var(--baby-pink); color: var(--baby-pink); }
         
-        .pass-btn { background: #333; color: var(--baby-pink); border: 1px dashed var(--baby-pink); font-size: 11px; margin-top: 15px; }
-        .pass-btn:hover { background: #444; border-style: solid; }
+        .pass-btn { background: #222; color: #777; border: 1px dashed #444; font-size: 10px; margin-top: 10px; padding: 8px; }
+        .extend-btn { background: #331a1e; color: var(--hot-pink); border: 1px solid var(--hot-pink); font-size: 11px; margin-top: 10px; }
 
-        .correct-btn { background: #00ff88; color: black; } 
-        .wrong-btn { background: #ff4444; color: white; } 
+        .correct-btn { background: var(--mint); color: #2b5e32; box-shadow: 0 0 10px rgba(178, 242, 187, 0.3); } 
+        .wrong-btn { background: var(--coral); color: #5c1e1e; box-shadow: 0 0 10px rgba(255, 135, 135, 0.3); } 
 
         input { background: #000; border: 1px solid var(--baby-pink); padding: 12px; border-radius: 8px; color: var(--baby-pink); text-align: center; width: 80%; outline: none; }
         .input-card { background: #1a1a1a; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #333; }
@@ -70,7 +72,7 @@
         .hidden { display: none; }
         .answer-box { background: #000; padding: 20px; border-radius: 20px; border: 1px solid var(--baby-pink); margin-top: 20px; }
         .scoreboard { margin-top: 25px; text-align: left; border-top: 1px solid #333; padding-top: 15px; }
-        .score-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 12px; }
+        .score-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -97,14 +99,15 @@
             </div>
             
             <div id="timer" class="timer">5</div>
-            <p id="rehear-display" style="font-size: 14px; margin-bottom: 20px;">READY?</p>
+            <p id="rehear-display" style="font-size: 13px; margin-bottom: 20px;">READY?</p>
             
-            <button id="play-btn" onclick="startTurn()">PLAY 5 SECONDS</button>
+            <button id="play-btn" onclick="startTurn(5)">PLAY 5 SECONDS</button>
             
             <div id="post-play-controls" class="hidden">
-                <button class="secondary-btn" onclick="startTurn()">REHEAR SONG ↺</button>
+                <button class="secondary-btn" onclick="startTurn(5)">REHEAR ↺</button>
+                <button class="extend-btn" id="extend-btn-el" onclick="useExtend()">EXTEND +3s (-2 PTS)</button>
                 <button onclick="revealAnswer()">REVEAL ANSWER 🔍</button>
-                <button id="pass-btn-el" class="pass-btn" onclick="usePass()">SKIP & GET NEW SONG</button>
+                <button id="pass-btn-el" class="pass-btn" onclick="usePass()">SKIP SONG</button>
             </div>
             
             <div id="answer-area" class="hidden">
@@ -135,6 +138,7 @@
         let unusedSongs = [];
         let totalRounds = 5, currentRound = 1, currentPlayerIdx = 0;
         let rehearCount = 0, audio = new Audio(), currentSong = null;
+        let extendUsedThisTurn = false;
 
         function showNameScreen() {
             const count = document.getElementById('playerCount').value;
@@ -152,27 +156,22 @@
                 let nameVal = document.getElementById(`name-${i}`).value;
                 players.push({ name: nameVal || `PLAYER ${i}`, score: 0, passesUsed: 0 });
             }
-            
-            // Fill the unused list from playlist.js
             unusedSongs = [...mySongs];
-            
             document.getElementById('name-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             setupTurn();
         }
 
         function setupTurn() {
-            // Check if we ran out of songs
             if (unusedSongs.length === 0) {
                 alert("💖 ALL SONGS PLAYED! RESTARTING LIBRARY...");
-                unusedSongs = [...mySongs]; // Refill
+                unusedSongs = [...mySongs];
             }
-
-            // Pick random from unused list
             const randomIndex = Math.floor(Math.random() * unusedSongs.length);
             currentSong = unusedSongs[randomIndex];
             
             rehearCount = 0;
+            extendUsedThisTurn = false;
             const p = players[currentPlayerIdx];
             document.getElementById('display-round').innerText = `ROUND ${currentRound}/${totalRounds}`;
             document.getElementById('display-player-name').innerText = p.name.toUpperCase();
@@ -184,40 +183,45 @@
             updateScoreboard();
         }
 
-        function startTurn() {
+        function startTurn(seconds) {
             audio.src = currentSong.url;
             audio.load();
             document.getElementById('play-btn').classList.add('hidden');
             document.getElementById('post-play-controls').classList.add('hidden');
 
             audio.play().then(() => {
-                let timeLeft = 5;
+                let timeLeft = seconds;
+                document.getElementById('timer').innerText = timeLeft;
                 const interval = setInterval(() => {
                     timeLeft--;
                     document.getElementById('timer').innerText = timeLeft;
                     if(timeLeft <= 0) {
                         clearInterval(interval);
                         audio.pause();
-                        rehearCount++;
+                        if(seconds === 5) rehearCount++;
                         document.getElementById('post-play-controls').classList.remove('hidden');
+                        
                         let pts = rehearCount === 1 ? 3 : (rehearCount === 2 ? 2 : 1);
                         document.getElementById('rehear-display').innerText = `NEXT PLAY WORTH: ${pts} PTS`;
                         
                         const p = players[currentPlayerIdx];
-                        document.getElementById('pass-btn-el').innerText = p.passesUsed === 0 ? "FREE SKIP (NEW SONG)" : "SKIP (-3 PTS PENALTY)";
+                        document.getElementById('pass-btn-el').innerText = p.passesUsed === 0 ? "FREE SKIP" : "SKIP (-3 PTS)";
                     }
                 }, 1000);
-            }).catch(e => console.log("Audio play blocked"));
+            }).catch(e => console.log("Blocked"));
+        }
+
+        function useExtend() {
+            players[currentPlayerIdx].score -= 2; // Immediate penalty
+            extendUsedThisTurn = true;
+            updateScoreboard();
+            startTurn(3); // Plays for 3 seconds
         }
 
         function usePass() {
             const p = players[currentPlayerIdx];
-            if (p.passesUsed > 0) {
-                p.score -= 3;
-            }
+            if (p.passesUsed > 0) p.score -= 3;
             p.passesUsed++;
-            // Note: We DON'T remove the skipped song from unusedSongs 
-            // so it can appear again later for someone else!
             setupTurn(); 
         }
 
@@ -227,11 +231,16 @@
             document.getElementById('song-artist').innerText = currentSong.artist.toUpperCase();
             document.getElementById('answer-area').classList.remove('hidden');
             
-            // REMOVE SONG FROM UNUSED LIST (It was revealed, so it's done)
+            // Remove from list
             unusedSongs = unusedSongs.filter(s => s.url !== currentSong.url);
+
+            // FEATURE: Keep playing until Yes/No is clicked
+            audio.currentTime = 0;
+            audio.play();
         }
 
         function handleScore(isCorrect) {
+            audio.pause(); // Stop the music finally
             if (isCorrect) {
                 if (rehearCount === 1) players[currentPlayerIdx].score += 5;
                 else if (rehearCount === 2) players[currentPlayerIdx].score += 3;
@@ -245,7 +254,7 @@
         }
 
         function updateScoreboard() {
-            let html = '<p style="font-weight:bold; color:var(--hot-pink); font-size:11px;">LEADERBOARD</p>';
+            let html = '<p style="font-weight:bold; color:var(--hot-pink); font-size:10px; letter-spacing:1px;">LEADERBOARD</p>';
             players.forEach(p => {
                 html += `<div class="score-row"><span>${p.name.toUpperCase()}</span><span>${p.score} PTS</span></div>`;
             });
