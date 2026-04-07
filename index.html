@@ -105,7 +105,7 @@
             
             <div id="post-play-controls" class="hidden">
                 <button class="secondary-btn" onclick="startTurn(5)">REHEAR ↺</button>
-                <button class="extend-btn" onclick="useExtend()">EXTEND TO 8s (-1 PT)</button>
+                <button class="extend-btn" onclick="useExtend()">EXTEND TO 10s (-1 PT)</button>
                 <button onclick="revealAnswer()">REVEAL ANSWER 🔍</button>
                 <button id="pass-btn-el" class="pass-btn" onclick="usePass()">SKIP SONG</button>
             </div>
@@ -138,6 +138,7 @@
         let unusedSongs = [];
         let totalRounds = 5, currentRound = 1, currentPlayerIdx = 0;
         let rehearCount = 0, audio = new Audio(), currentSong = null;
+        let extensionPenalty = 0; // New variable to track extension debt
 
         function showNameScreen() {
             const count = document.getElementById('playerCount').value;
@@ -170,6 +171,7 @@
             currentSong = unusedSongs[randomIndex];
             
             rehearCount = 0;
+            extensionPenalty = 0; // Reset penalty for new turn
             const p = players[currentPlayerIdx];
             document.getElementById('display-round').innerText = `ROUND ${currentRound}/${totalRounds}`;
             document.getElementById('display-player-name').innerText = p.name.toUpperCase();
@@ -210,14 +212,14 @@
         }
 
         function useExtend() {
-            players[currentPlayerIdx].score -= 1; // Updated penalty to -1
-            updateScoreboard();
-            startTurn(8); 
+            extensionPenalty = 1; // Mark that 1 point will be removed from final gain
+            document.getElementById('rehear-display').innerText = `EXTENDED! (-1 PT APPLIED)`;
+            startTurn(10); // Now plays for 10 seconds total
         }
 
         function usePass() {
             const p = players[currentPlayerIdx];
-            if (p.passesUsed > 0) p.score -= 3; // Kept at -3
+            if (p.passesUsed > 0) p.score -= 3;
             p.passesUsed++;
             setupTurn(); 
         }
@@ -237,11 +239,19 @@
         function handleScore(isCorrect) {
             audio.pause(); 
             if (isCorrect) {
-                if (rehearCount === 1) players[currentPlayerIdx].score += 5;
-                else if (rehearCount === 2) players[currentPlayerIdx].score += 3;
-                else if (rehearCount === 3) players[currentPlayerIdx].score += 2;
-                else players[currentPlayerIdx].score += 1;
+                let turnPoints = 0;
+                if (rehearCount === 1) turnPoints = 5;
+                else if (rehearCount === 2) turnPoints = 3;
+                else if (rehearCount === 3) turnPoints = 2;
+                else turnPoints = 1;
+
+                // Subtract extension penalty from the earned points
+                players[currentPlayerIdx].score += (turnPoints - extensionPenalty);
+            } else {
+                // If they are wrong, they still lose the point for extending if they used it
+                players[currentPlayerIdx].score -= extensionPenalty;
             }
+
             currentPlayerIdx++;
             if (currentPlayerIdx >= players.length) { currentPlayerIdx = 0; currentRound++; }
             if (currentRound > totalRounds) showWinner();
