@@ -14,6 +14,7 @@
         button:disabled { background: #444; cursor: not-allowed; }
         .hidden { display: none; }
         .answer-box { background: #333; padding: 15px; border-radius: 10px; margin-top: 20px; border: 2px solid #1DB954; }
+        input { padding: 10px; border-radius: 5px; width: 60px; border: none; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -23,7 +24,7 @@
         
         <div id="setup-screen">
             <p>How many players?</p>
-            <input type="number" id="playerInput" value="2" min="1" style="padding: 10px; border-radius: 5px; width: 50px;">
+            <input type="number" id="playerInput" value="2" min="1">
             <button onclick="startGame()">Start Game</button>
         </div>
 
@@ -42,60 +43,3 @@
             </div>
         </div>
     </div>
-
-    <script src="playlist.js"></script>
-
-    <script>
-        let players = [];
-        let currentPlayer = 0;
-        let audio = new Audio();
-        let currentSong = null;
-
-        function startGame() {
-            const count = document.getElementById('playerInput').value;
-            for(let i=1; i<=count; i++) players.push(`Player ${i}`);
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-            updateTurnText();
-        }
-
-        function updateTurnText() {
-            document.getElementById('player-turn').innerText = `${players[currentPlayer]}'s Turn`;
-        }
-
-        function startTurn() {
-            // Pick a random song from playlist.js
-            currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
-            audio.src = currentSong.url;
-            
-            document.getElementById('play-btn').disabled = true;
-            audio.play();
-
-            let timeLeft = 5;
-            const interval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer').innerText = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(interval);
-                    audio.pause();
-                    showAnswer();
-                }
-            }, 1000);
-        }
-
-        function showAnswer() {
-            document.getElementById('song-title').innerText = currentSong.title;
-            document.getElementById('song-artist').innerText = currentSong.artist;
-            document.getElementById('answer-area').classList.remove('hidden');
-        }
-
-        function nextPlayer() {
-            currentPlayer = (currentPlayer + 1) % players.length;
-            document.getElementById('answer-area').classList.add('hidden');
-            document.getElementById('play-btn').disabled = false;
-            document.getElementById('timer').innerText = "5";
-            updateTurnText();
-        }
-    </script>
-</body>
-</html>
