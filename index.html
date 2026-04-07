@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Guessr - Baby Pink Edition</title>
+    <title>Song Guessr - Pink & Black Edition</title>
     <style>
         :root { 
-            --baby-pink: #ffdae0; 
+            --baby-pink: #ffb7c5; 
             --hot-pink: #ff85a1;
-            --soft-white: #fff5f7;
-            --text-grey: #5d5d5d;
+            --dark-bg: #000000;
+            --card-bg: #111111;
         }
         
         body { 
             font-family: 'Inter', -apple-system, sans-serif; 
-            background: var(--baby-pink); 
-            color: var(--text-grey); 
+            background: var(--dark-bg); 
+            color: var(--baby-pink); 
             margin: 0; 
             display: flex; 
             align-items: center; 
@@ -26,24 +26,25 @@
         .container { 
             width: 90%; 
             max-width: 450px; 
-            background: white; 
-            padding: 30px; 
+            background: var(--card-bg); 
+            padding: 35px; 
             border-radius: 30px; 
-            box-shadow: 0 15px 30px rgba(255, 133, 161, 0.2); 
+            border: 2px solid var(--baby-pink);
+            box-shadow: 0 0 20px rgba(255, 183, 197, 0.2); 
             text-align: center; 
         }
 
-        h1 { color: var(--hot-pink); font-size: 2.2rem; margin-bottom: 10px; }
-        .timer { font-size: 80px; font-weight: 800; color: var(--hot-pink); margin: 10px 0; }
+        h1 { color: var(--baby-pink); font-size: 2.2rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .timer { font-size: 80px; font-weight: 800; color: var(--hot-pink); margin: 10px 0; text-shadow: 0 0 15px var(--hot-pink); }
         
         button { 
-            background: var(--hot-pink); 
-            color: white; 
+            background: var(--baby-pink); 
+            color: black; 
             border: none; 
             padding: 16px; 
             font-size: 14px; 
-            font-weight: 700; 
-            border-radius: 20px; 
+            font-weight: 800; 
+            border-radius: 12px; 
             cursor: pointer; 
             transition: 0.3s; 
             width: 100%; 
@@ -51,79 +52,91 @@
             text-transform: uppercase;
         }
 
-        button:hover { background: #ff6b8e; transform: scale(1.02); }
-        .secondary-btn { background: var(--soft-white); border: 2px solid var(--hot-pink); color: var(--hot-pink); }
-        .correct-btn { background: #98ddca; color: #2d5a4c; } 
-        .wrong-btn { background: #ffa3a3; color: #7a2a2a; } 
+        button:hover { background: var(--hot-pink); transform: translateY(-2px); }
+        .secondary-btn { background: transparent; border: 2px solid var(--baby-pink); color: var(--baby-pink); }
+        .correct-btn { background: #00ff88; color: black; } 
+        .wrong-btn { background: #ff4444; color: white; } 
 
-        .input-card { background: var(--soft-white); padding: 15px; border-radius: 20px; margin-bottom: 15px; }
+        .input-card { background: #1a1a1a; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #333; }
+        
         input { 
-            background: white; 
-            border: 2px solid var(--baby-pink); 
-            padding: 10px; 
-            border-radius: 12px; 
+            background: #000; 
+            border: 1px solid var(--baby-pink); 
+            padding: 12px; 
+            border-radius: 8px; 
             font-size: 16px; 
-            color: var(--text-grey); 
+            color: var(--baby-pink); 
             outline: none;
             text-align: center;
+            width: 80%;
         }
-        input:focus { border-color: var(--hot-pink); }
 
         .name-entry { margin-bottom: 10px; display: block; width: 100%; box-sizing: border-box; }
         .hidden { display: none; }
-        .answer-box { background: var(--soft-white); padding: 20px; border-radius: 20px; border: 2px dashed var(--hot-pink); margin-top: 20px; }
-        .scoreboard { margin-top: 20px; text-align: left; font-size: 14px; }
-        .score-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--baby-pink); }
+        
+        .answer-box { 
+            background: #000; 
+            padding: 20px; 
+            border-radius: 20px; 
+            border: 1px solid var(--baby-pink); 
+            margin-top: 20px; 
+            box-shadow: inset 0 0 10px rgba(255, 183, 197, 0.1);
+        }
+
+        .scoreboard { margin-top: 25px; text-align: left; border-top: 1px solid #333; padding-top: 15px; }
+        .score-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; }
+        
+        #winner-name { font-size: 40px; color: var(--hot-pink); text-shadow: 0 0 20px var(--hot-pink); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🎀 Song Guessr</h1>
+        <h1>🎀 SONG GUESSR</h1>
         
         <div id="setup-screen">
             <div class="input-card">
-                <p>How many players?</p>
+                <p>HOW MANY PLAYERS?</p>
                 <input type="number" id="playerCount" value="2" min="1">
             </div>
             <div class="input-card">
-                <p>How many rounds?</p>
+                <p>HOW MANY ROUNDS?</p>
                 <input type="number" id="roundCount" value="5" min="1">
             </div>
-            <button onclick="showNameScreen()">Next: Enter Names ✨</button>
+            <button onclick="showNameScreen()">NEXT: ENTER NAMES ✨</button>
         </div>
 
         <div id="name-screen" class="hidden">
-            <p>Who is playing?</p>
+            <p>NAME THE PLAYERS:</p>
             <div id="name-inputs-container"></div>
-            <button onclick="startGame()">Start Game! 🎵</button>
+            <button onclick="startGame()">START TOURNAMENT 🎵</button>
         </div>
 
         <div id="game-screen" class="hidden">
-            <div style="display:flex; justify-content: space-between; font-size: 12px; font-weight: bold;">
-                <span id="display-round">Round 1</span>
-                <span id="display-player-name" style="color: var(--hot-pink);">Name</span>
+            <div style="display:flex; justify-content: space-between; font-size: 13px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                <span id="display-round">ROUND 1</span>
+                <span id="display-player-name" style="color: var(--hot-pink);">PLAYER</span>
             </div>
             
             <div id="timer" class="timer">5</div>
-            <p id="rehear-display" style="font-size: 14px;">Get ready!</p>
+            <p id="rehear-display" style="font-size: 14px; margin-bottom: 20px;">READY?</p>
             
-            <button id="play-btn" onclick="startTurn()">Play 5 Seconds</button>
+            <button id="play-btn" onclick="startTurn()">PLAY 5 SECONDS</button>
             
             <div id="post-play-controls" class="hidden">
-                <button class="secondary-btn" onclick="startTurn()">Listen Again ↺</button>
-                <button onclick="revealAnswer()">Reveal Answer 🔍</button>
+                <button class="secondary-btn" onclick="startTurn()">REHEAR SONG ↺</button>
+                <button onclick="revealAnswer()">REVEAL ANSWER 🔍</button>
             </div>
             
             <div id="answer-area" class="hidden">
                 <div class="answer-box">
-                    <h2 id="song-title" style="margin:0;">Song Name</h2>
-                    <p id="song-artist" style="margin:5px 0 0 0; color: var(--hot-pink);">Artist Name</p>
+                    <h2 id="song-title" style="margin:0; color: white;">SONG NAME</h2>
+                    <p id="song-artist" style="margin:5px 0 0 0; color: var(--hot-pink);">ARTIST NAME</p>
                 </div>
-                <p style="margin-top:15px; font-weight:bold;">Did they get it right?</p>
+                <p style="margin-top:20px; font-weight:bold;">GUESSED CORRECTLY?</p>
                 <div style="display:flex; gap: 10px;">
-                    <button class="wrong-btn" onclick="handleScore(false)">No ❌</button>
-                    <button class="correct-btn" onclick="handleScore(true)">Yes ✅</button>
+                    <button class="wrong-btn" onclick="handleScore(false)">❌ NO</button>
+                    <button class="correct-btn" onclick="handleScore(true)">✅ YES</button>
                 </div>
             </div>
 
@@ -131,10 +144,10 @@
         </div>
 
         <div id="winner-screen" class="hidden">
-            <h2 style="color: var(--hot-pink);">Winner! 🏆</h2>
-            <h1 id="winner-name">Name</h1>
-            <div id="final-list"></div>
-            <button onclick="location.reload()">Play Again</button>
+            <p style="letter-spacing: 3px;">CHAMPION</p>
+            <h1 id="winner-name">NAME</h1>
+            <div id="final-list" style="margin-bottom: 20px;"></div>
+            <button onclick="location.reload()">NEW TOURNAMENT</button>
         </div>
     </div>
 
@@ -154,7 +167,7 @@
             const container = document.getElementById('name-inputs-container');
             container.innerHTML = '';
             for(let i=1; i<=count; i++) {
-                container.innerHTML += `<input type="text" class="name-entry" placeholder="Player ${i} Name" id="name-${i}">`;
+                container.innerHTML += `<input type="text" class="name-entry" placeholder="NAME PLAYER ${i}" id="name-${i}">`;
             }
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('name-screen').classList.remove('hidden');
@@ -162,14 +175,11 @@
 
         function startGame() {
             const count = document.getElementById('playerCount').value;
-            totalRounds = document.getElementById('roundCount').value;
+            totalRounds = parseInt(document.getElementById('roundCount').value);
             players = [];
             for(let i=1; i<=count; i++) {
                 let nameVal = document.getElementById(`name-${i}`).value;
-                players.push({ 
-                    name: nameVal || `Player ${i}`, 
-                    score: 0 
-                });
+                players.push({ name: nameVal || `PLAYER ${i}`, score: 0 });
             }
             document.getElementById('name-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
@@ -179,9 +189,9 @@
         function setupTurn() {
             currentSong = mySongs[Math.floor(Math.random() * mySongs.length)];
             rehearCount = 0;
-            document.getElementById('display-round').innerText = `Round ${currentRound}/${totalRounds}`;
-            document.getElementById('display-player-name').innerText = players[currentPlayerIdx].name;
-            document.getElementById('rehear-display').innerText = `First Listen! (5 points)`;
+            document.getElementById('display-round').innerText = `ROUND ${currentRound}/${totalRounds}`;
+            document.getElementById('display-player-name').innerText = players[currentPlayerIdx].name.toUpperCase();
+            document.getElementById('rehear-display').innerText = `WORTH 5 POINTS`;
             document.getElementById('timer').innerText = "5";
             document.getElementById('play-btn').classList.remove('hidden');
             document.getElementById('post-play-controls').classList.add('hidden');
@@ -206,17 +216,18 @@
                         rehearCount++;
                         document.getElementById('post-play-controls').classList.remove('hidden');
                         
+                        // Scoring hints
                         let points = rehearCount === 1 ? 3 : (rehearCount === 2 ? 2 : 1);
-                        document.getElementById('rehear-display').innerText = `Next listen worth: ${points} points`;
+                        document.getElementById('rehear-display').innerText = `NEXT PLAY WORTH: ${points} PTS`;
                     }
                 }, 1000);
-            }).catch(e => alert("Make sure your phone isn't on silent!"));
+            }).catch(e => alert("PLEASE CHECK VOLUME/MUTE!"));
         }
 
         function revealAnswer() {
             document.getElementById('post-play-controls').classList.add('hidden');
-            document.getElementById('song-title').innerText = currentSong.title;
-            document.getElementById('song-artist').innerText = currentSong.artist;
+            document.getElementById('song-title').innerText = currentSong.title.toUpperCase();
+            document.getElementById('song-artist').innerText = currentSong.artist.toUpperCase();
             document.getElementById('answer-area').classList.remove('hidden');
         }
 
@@ -237,9 +248,9 @@
         }
 
         function updateScoreboard() {
-            let html = '<p style="font-weight:bold; color:var(--hot-pink); margin-bottom:5px;">Scores</p>';
+            let html = '<p style="font-weight:bold; color:var(--hot-pink); font-size:11px;">LEADERBOARD</p>';
             players.forEach(p => {
-                html += `<div class="score-row"><span>${p.name}</span><span>${p.score} pts</span></div>`;
+                html += `<div class="score-row"><span>${p.name.toUpperCase()}</span><span>${p.score} PTS</span></div>`;
             });
             document.getElementById('scoreboard').innerHTML = html;
         }
@@ -248,9 +259,9 @@
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('winner-screen').classList.remove('hidden');
             let sorted = [...players].sort((a,b) => b.score - a.score);
-            document.getElementById('winner-name').innerText = sorted[0].name;
+            document.getElementById('winner-name').innerText = sorted[0].name.toUpperCase();
             let finalHtml = '';
-            sorted.forEach(p => finalHtml += `<p>${p.name}: ${p.score} pts</p>`);
+            sorted.forEach(p => finalHtml += `<p>${p.name.toUpperCase()}: ${p.score} PTS</p>`);
             document.getElementById('final-list').innerHTML = finalHtml;
         }
     </script>
